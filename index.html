@@ -49,9 +49,6 @@
 
 <body>
     <div id="root"></div>
-    <!-- Load React and ReactDOM from a CDN -->
-    <script src="https://unpkg.com/react/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom/umd/react-dom.development.js" crossorigin></script>
     <script>
         const frames = [
             {
@@ -82,44 +79,43 @@
             },
         ];
 
-        class App extends React.Component {
-            constructor(props) {
-                super(props);
-                this.state = {
-                    currentFrame: 0,
-                };
-            }
+        let currentFrame = 0;
 
-            nextFrame = () => {
-                this.setState((prevState) => ({
-                    currentFrame: prevState.currentFrame < frames.length - 1 ? prevState.currentFrame + 1 : 0,
-                }));
+        function renderFrame() {
+            const root = document.getElementById('root');
+            root.innerHTML = '';
+
+            const frameDiv = document.createElement('div');
+            frameDiv.className = 'frame';
+
+            const frameTitle = document.createElement('h2');
+            frameTitle.textContent = `Frame ${frames[currentFrame].id}`;
+            frameDiv.appendChild(frameTitle);
+
+            const betsDiv = document.createElement('div');
+            betsDiv.className = 'bets';
+
+            frames[currentFrame].bets.forEach(bet => {
+                const betDiv = document.createElement('div');
+                betDiv.className = `bet ${bet.result}`;
+                betDiv.innerHTML = `<p>${bet.position}</p><p>${bet.amount}</p><p>${bet.result}</p>`;
+                betsDiv.appendChild(betDiv);
+            });
+
+            frameDiv.appendChild(betsDiv);
+            root.appendChild(frameDiv);
+
+            const nextButton = document.createElement('button');
+            nextButton.textContent = 'Next Bet';
+            nextButton.onclick = () => {
+                currentFrame = (currentFrame + 1) % frames.length;
+                renderFrame();
             };
 
-            render() {
-                const { currentFrame } = this.state;
-                return (
-                    <div className="App">
-                        <h1>Roulette Betting Strategy</h1>
-                        <div className="frame">
-                            <h2>Frame {frames[currentFrame].id}</h2>
-                            <div className="bets">
-                                {frames[currentFrame].bets.map((bet, index) => (
-                                    <div key={index} className={`bet ${bet.result}`}>
-                                        <p>{bet.position}</p>
-                                        <p>{bet.amount}</p>
-                                        <p>{bet.result}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                        <button onClick={this.nextFrame}>Next Bet</button>
-                    </div>
-                );
-            }
+            root.appendChild(nextButton);
         }
 
-        ReactDOM.render(<App />, document.getElementById('root'));
+        renderFrame();
     </script>
 </body>
 
